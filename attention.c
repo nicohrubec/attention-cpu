@@ -4,22 +4,7 @@
 #include <stdint.h>
 #include <time.h>
 
-void print_matrix(int n, int m, float (*matrix)[n]) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            printf("%.2f ", matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void init_matrix(int n, int m, float (*matrix)[n]) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            matrix[i][j] = (float)rand() / RAND_MAX;
-        }
-    }
-}
+#include "lib.h"
 
 int main(int argc, char *argv[]) {
     int seed = 42;
@@ -103,6 +88,16 @@ int main(int argc, char *argv[]) {
     }
 
     clock_t start_time = clock();
+
+    float (*matmul_result)[seq_len];
+    matmul_result = (float(*)[seq_len])malloc(seq_len * d_model * sizeof(float));
+
+    matmul(seq_len, embedding_dim, input_matrix, queries_matrix, matmul_result);
+
+    if (verbose) {
+        printf("Matmul result:\n");
+        print_matrix(seq_len, d_model, matmul_result);
+    }
 
     // attention:
     // step 1: multiply input matrix with keys, values, and queries
