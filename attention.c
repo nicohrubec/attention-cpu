@@ -54,23 +54,23 @@ int main(int argc, char *argv[]) {
     srand(seed);
 
     // input matrix: seq_len * embedding_dim
-    float(*input_matrix)[seq_len];
-    input_matrix = (float(*)[seq_len])malloc(seq_len * embedding_dim * sizeof(float));
+    float(*input_matrix)[embedding_dim];
+    input_matrix = (float(*)[embedding_dim])malloc(seq_len * embedding_dim * sizeof(float));
     init_matrix(seq_len, embedding_dim, input_matrix);
 
     // queries matrix: embedding_dim * d_model
-    float(*queries_matrix)[embedding_dim];
-    queries_matrix = (float(*)[embedding_dim])malloc(embedding_dim * d_model * sizeof(float));
+    float(*queries_matrix)[d_model];
+    queries_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
     init_matrix(embedding_dim, d_model, queries_matrix);
 
     // keys matrix: embedding_dim * d_model
-    float(*keys_matrix)[embedding_dim];
-    keys_matrix = (float(*)[embedding_dim])malloc(embedding_dim * d_model * sizeof(float));
+    float(*keys_matrix)[d_model];
+    keys_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
     init_matrix(embedding_dim, d_model, keys_matrix);
 
     // values matrix: embedding_dim * d_model
-    float(*values_matrix)[embedding_dim];
-    values_matrix = (float(*)[embedding_dim])malloc(embedding_dim * d_model * sizeof(float));
+    float(*values_matrix)[d_model];
+    values_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
     init_matrix(embedding_dim, d_model, values_matrix);    
 
     if (verbose) {
@@ -89,10 +89,10 @@ int main(int argc, char *argv[]) {
 
     clock_t start_time = clock();
 
-    float (*matmul_result)[seq_len];
-    matmul_result = (float(*)[seq_len])malloc(seq_len * d_model * sizeof(float));
+    float (*matmul_result)[d_model];
+    matmul_result = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
 
-    matmul(seq_len, embedding_dim, input_matrix, queries_matrix, matmul_result);
+    matmul(seq_len, embedding_dim, d_model, input_matrix, queries_matrix, matmul_result);
 
     if (verbose) {
         printf("Matmul result:\n");
@@ -106,9 +106,7 @@ int main(int argc, char *argv[]) {
     // step 4: apply softmax
     // step 5: multiply with values
     
-    // TODO: implement matrix multiplication
     // TODO: implement softmax
-    // TODO: implement transpose
 
     clock_t end_time = clock();
 
