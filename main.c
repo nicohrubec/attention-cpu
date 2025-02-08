@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdint.h>
+#include <time.h>
 
 void print_matrix(int n, uint8_t (*matrix)[n]) {
     for (int i = 0; i < n; i++) {
@@ -65,6 +66,15 @@ int main(int argc, char *argv[]) {
         printf("Input matrix:\n");
         print_matrix(n, input_matrix);
     }
+
+    clock_t start_time = clock();
+
+    // TODO: implement stuff here
+
+    clock_t end_time = clock();
+    
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f seconds\n", time_taken);
 
     // clean up
     free(input_matrix);
