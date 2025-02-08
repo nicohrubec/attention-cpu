@@ -4,18 +4,18 @@
 #include <stdint.h>
 #include <time.h>
 
-void print_matrix(int n, float (*matrix)[n]) {
+void print_matrix(int n, int m, float (*matrix)[n]) {
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < m; j++) {
             printf("%.2f ", matrix[i][j]);
         }
         printf("\n");
     }
 }
 
-void init_matrix(int n, float (*matrix)[n]) {
+void init_matrix(int n, int m, float (*matrix)[n]) {
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < m; j++) {
             matrix[i][j] = (float)rand() / RAND_MAX;
         }
     }
@@ -23,12 +23,14 @@ void init_matrix(int n, float (*matrix)[n]) {
 
 int main(int argc, char *argv[]) {
     int seed = 42;
-    int n = 10;
+    int seq_len = 10;
+    int d_model = 10;
     int verbose = 0;
     int opt;
 
     // define arguments
-    static struct option long_options[] = {{"number", required_argument, 0, 'n'},
+    static struct option long_options[] = {{"seq_len", required_argument, 0, 'n'},
+                                           {"d_model", required_argument, 0, 'd'},
                                            {"seed", required_argument, 0, 's'},
                                            {"verbose", no_argument, 0, 'v'},
                                            {0, 0, 0, 0}};
@@ -42,7 +44,10 @@ int main(int argc, char *argv[]) {
 
         switch (opt) {
             case 'n':
-                n = atoi(optarg);
+                seq_len = atoi(optarg);
+                break;
+            case 'd':
+                d_model = atoi(optarg);
                 break;
             case 's':
                 seed = atoi(optarg);
@@ -58,13 +63,13 @@ int main(int argc, char *argv[]) {
 
     srand(seed);
 
-    float(*input_matrix)[n];
-    input_matrix = (float(*)[n])malloc(n * n * sizeof(float));
-    init_matrix(n, input_matrix);
+    float(*input_matrix)[seq_len];
+    input_matrix = (float(*)[seq_len])malloc(seq_len * d_model * sizeof(float));
+    init_matrix(seq_len, d_model, input_matrix);
 
     if (verbose) {
         printf("Input matrix:\n");
-        print_matrix(n, input_matrix);
+        print_matrix(seq_len, d_model, input_matrix);
     }
 
     clock_t start_time = clock();
@@ -75,6 +80,10 @@ int main(int argc, char *argv[]) {
     // step 3: divide by sqrt(n)
     // step 4: apply softmax
     // step 5: multiply with values
+
+    // dimensions:
+    // input_matrix: seq_len * d_model
+    // keys: 
     
     // TODO: implement matrix multiplication
     // TODO: implement softmax
