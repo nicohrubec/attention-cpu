@@ -4,19 +4,19 @@
 #include <stdint.h>
 #include <time.h>
 
-void print_matrix(int n, uint8_t (*matrix)[n]) {
+void print_matrix(int n, float (*matrix)[n]) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%d ", matrix[i][j]);
+            printf("%.2f ", matrix[i][j]);
         }
         printf("\n");
     }
 }
 
-void init_matrix(int n, uint8_t (*matrix)[n]) {
+void init_matrix(int n, float (*matrix)[n]) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            matrix[i][j] = rand() % 2;
+            matrix[i][j] = (float)rand() / RAND_MAX;
         }
     }
 }
@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
 
     srand(seed);
 
-    uint8_t(*input_matrix)[n];
-    input_matrix = (uint8_t(*)[n])malloc(n * n * sizeof(uint8_t));
+    float(*input_matrix)[n];
+    input_matrix = (float(*)[n])malloc(n * n * sizeof(float));
     init_matrix(n, input_matrix);
 
     if (verbose) {
@@ -69,10 +69,19 @@ int main(int argc, char *argv[]) {
 
     clock_t start_time = clock();
 
-    // TODO: implement stuff here
+    // attention:
+    // step 1: multiply input matrix with keys, values, and queries
+    // step 2: multiply queries with transposed keys
+    // step 3: divide by sqrt(n)
+    // step 4: apply softmax
+    // step 5: multiply with values
+    
+    // TODO: implement matrix multiplication
+    // TODO: implement softmax
+    // TODO: implement transpose
 
     clock_t end_time = clock();
-    
+
     double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
     printf("Time taken: %f seconds\n", time_taken);
 

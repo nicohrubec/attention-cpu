@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 
-all: main
+all: attention
 
-main: main.c
-	$(CC) $(CFLAGS) -o main main.c
+attention: attention.c
+	$(CC) $(CFLAGS) -o attention attention.c
 
 clean:
-	rm -f main
+	rm -f attention
