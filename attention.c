@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     int seq_len = 2048;
     int d_model = 64;
     int embedding_dim = 768;
-    int verbose = 0;
+    int verify = 0;
     int opt;
 
     // define arguments
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
                                            {"d_model", required_argument, 0, 'd'},
                                            {"embedding_dim", required_argument, 0, 'e'},
                                            {"seed", required_argument, 0, 's'},
-                                           {"verbose", no_argument, 0, 'v'},
+                                           {"verify", no_argument, 0, 'v'},
                                            {0, 0, 0, 0}};
     
     // argument parsing
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
                 seed = atoi(optarg);
                 break;
             case 'v':
-                verbose = 1;
+                verify = 1;
                 break;
             default:
                 fprintf(stderr, "Usage: %s -n <n> -s <s> -v\n", argv[0]);
@@ -125,26 +125,27 @@ int main(int argc, char *argv[]) {
     // values matrix: embedding_dim * d_model
     float(*pretrained_values_matrix)[d_model];
     pretrained_values_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
-    init_matrix(embedding_dim, d_model, pretrained_values_matrix);    
+    init_matrix(embedding_dim, d_model, pretrained_values_matrix);
 
-    if (verbose) {
-        printf("Input matrix:\n");
-        print_matrix(seq_len, embedding_dim, input_matrix);
+    // slow attention
+    float(*output_matrix_slow_attention)[d_model];
+    output_matrix_slow_attention = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_slow_attention);
 
-        printf("Queries matrix:\n");
-        print_matrix(embedding_dim, d_model, pretrained_queries_matrix);
+    // fast attention
+    float(*output_matrix_fast_attention)[d_model];
+    output_matrix_fast_attention = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_fast_attention);
 
-        printf("Keys matrix:\n");
-        print_matrix(embedding_dim, d_model, pretrained_keys_matrix);
-
-        printf("Values matrix:\n");
-        print_matrix(embedding_dim, d_model, pretrained_values_matrix);
+    // verify
+    if (verify) {
+        printf("Output matrix:\n");
+        if (is_equal(seq_len, d_model, output_matrix_slow_attention, output_matrix_fast_attention)) {
+            printf("VERIFICATION PASSED\n");
+        } else {
+            printf("VERIFICATION FAILED\n");
+        }
     }
-
-    // output matrix: seq_len * d_model
-    float(*output_matrix)[d_model];
-    output_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix);
 
     // clean up
     free(input_matrix);

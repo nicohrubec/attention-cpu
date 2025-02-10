@@ -62,3 +62,14 @@ void scale(int n, int m, float (*matrix)[m], float scalar) {
         }
     }
 }
+
+int is_equal(int n, int m, float (*matrix_a)[m], float (*matrix_b)[m]) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (matrix_a[i][j] != matrix_b[i][j]) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}

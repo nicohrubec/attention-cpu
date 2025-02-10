@@ -136,10 +136,44 @@ void test_scale() {
     }
 }
 
+void test_is_equal() {
+    int n = 2;
+    int m = 2;
+    float matrix_a[2][2] = {{1, 2}, {3, 4}};
+    float matrix_b[2][2] = {{1, 2}, {3, 4}};
+    float matrix_c[2][2] = {{1, 2}, {3, 5}};
+
+    printf("\n=== Testing is_equal ===\n");
+    printf("matrix_a:\n");
+    print_matrix(n, m, matrix_a);
+    printf("matrix_b:\n");
+    print_matrix(n, m, matrix_b);
+    printf("matrix_c:\n");
+    print_matrix(n, m, matrix_c);
+
+    printf("\nChecking matrix_a and matrix_b...\n");
+
+    if (is_equal(n, m, matrix_a, matrix_b)) {
+        printf("PASS: matrix_a and matrix_b are equal\n");
+    } else {
+        printf("FAIL: matrix_a and matrix_b are not equal\n");
+    }
+
+    printf("\nChecking matrix_a and matrix_c...\n");
+
+    if (!is_equal(n, m, matrix_a, matrix_c)) {
+        printf("PASS: matrix_a and matrix_c are not equal\n");
+    } else {
+        printf("FAIL: matrix_a and matrix_c are equal\n");
+    }
+}
+
+
 int main() {
     test_matmul();
     test_transpose();
     test_softmax();
     test_scale();
+    test_is_equal();
     return 0;
 }
