@@ -60,6 +60,55 @@ void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix
     free(attention_matrix);
 }
 
+// a faster version of the above attention implementation
+void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix)[embedding_dim], 
+                    float (*pretrained_queries_matrix)[d_model], float (*pretrained_keys_matrix)[d_model],
+                    float (*pretrained_values_matrix)[d_model], float (*output_matrix)[d_model]) {
+    clock_t start_time = clock();
+    
+    // project input matrix with keys, values, and queries
+    // seq_len * d_model
+    float (*queries_matrix)[d_model];
+    queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+
+    // seq_len * d_model
+    float (*keys_matrix)[d_model];
+    keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+
+    // seq_len * d_model
+    float (*values_matrix)[d_model];
+    values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+
+    // transpose keys matrix: d_model * seq_len
+    float (*transposed_keys_matrix)[seq_len];
+    transposed_keys_matrix = (float(*)[seq_len])malloc(d_model * seq_len * sizeof(float));
+    transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
+
+    // calculate how much each word pays attention to each other word: seq_len * seq_len
+    float (*attention_matrix)[seq_len];
+    attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
+    matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
+    scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
+    softmax(seq_len, seq_len, attention_matrix);
+
+    // multiply with values: seq_len * d_model
+    matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
+
+    clock_t end_time = clock();
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f seconds\n", time_taken);
+
+    // clean up temporary matrices
+    free(queries_matrix);
+    free(keys_matrix);
+    free(values_matrix);
+    free(transposed_keys_matrix);
+    free(attention_matrix);
+}
+
 int main(int argc, char *argv[]) {
     int seed = 42;
     int seq_len = 2048;
@@ -127,19 +176,18 @@ int main(int argc, char *argv[]) {
     pretrained_values_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
     init_matrix(embedding_dim, d_model, pretrained_values_matrix);
 
-    // slow attention
-    float(*output_matrix_slow_attention)[d_model];
-    output_matrix_slow_attention = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_slow_attention);
-
-    // fast attention
+    printf("Running fast attention...\n");
     float(*output_matrix_fast_attention)[d_model];
     output_matrix_fast_attention = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_fast_attention);
+    fast_attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_fast_attention);
 
     // verify
     if (verify) {
-        printf("Output matrix:\n");
+        printf("Running slow attention...\n");
+        float(*output_matrix_slow_attention)[d_model];
+        output_matrix_slow_attention = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+        attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix_slow_attention);
+
         if (is_equal(seq_len, d_model, output_matrix_slow_attention, output_matrix_fast_attention)) {
             printf("VERIFICATION PASSED\n");
         } else {
