@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -Wall -Wextra -std=c99 -O3
 
 SRCS = attention.c test.c lib.c
 OBJS = $(SRCS:.c=.o)
