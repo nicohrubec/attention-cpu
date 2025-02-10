@@ -43,14 +43,22 @@ void transpose(int n, int m, float (*matrix)[m], float (*result)[n]) {
     }
 }
 
-void softmax(int n, int m, float (*matrix)[m], float (*result)[m]) {
+void softmax(int n, int m, float (*matrix)[m]) {
     for (int i = 0; i < n; i++) {
         float exp_sum = 0;
         for (int j = 0; j < m; j++) {
             exp_sum += exp(matrix[i][j]);
         }
         for (int j = 0; j < m; j++) {
-            result[i][j] = exp(matrix[i][j]) / exp_sum;
+            matrix[i][j] = exp(matrix[i][j]) / exp_sum;
+        }
+    }
+}
+
+void scale(int n, int m, float (*matrix)[m], float scalar) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            matrix[i][j] *= scalar;
         }
     }
 }

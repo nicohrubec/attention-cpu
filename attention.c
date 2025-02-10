@@ -3,14 +3,14 @@
 #include <getopt.h>
 #include <stdint.h>
 #include <time.h>
-
+#include <math.h>
 #include "lib.h"
 
 int main(int argc, char *argv[]) {
     int seed = 42;
-    int seq_len = 10;
-    int d_model = 10;
-    int embedding_dim = 10;
+    int seq_len = 2048;
+    int d_model = 64;
+    int embedding_dim = 768;
     int verbose = 0;
     int opt;
 
@@ -59,44 +59,32 @@ int main(int argc, char *argv[]) {
     init_matrix(seq_len, embedding_dim, input_matrix);
 
     // queries matrix: embedding_dim * d_model
-    float(*queries_matrix)[d_model];
-    queries_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
-    init_matrix(embedding_dim, d_model, queries_matrix);
+    float(*pretrained_queries_matrix)[d_model];
+    pretrained_queries_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
+    init_matrix(embedding_dim, d_model, pretrained_queries_matrix);
 
     // keys matrix: embedding_dim * d_model
-    float(*keys_matrix)[d_model];
-    keys_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
-    init_matrix(embedding_dim, d_model, keys_matrix);
+    float(*pretrained_keys_matrix)[d_model];
+    pretrained_keys_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
+    init_matrix(embedding_dim, d_model, pretrained_keys_matrix);
 
     // values matrix: embedding_dim * d_model
-    float(*values_matrix)[d_model];
-    values_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
-    init_matrix(embedding_dim, d_model, values_matrix);    
+    float(*pretrained_values_matrix)[d_model];
+    pretrained_values_matrix = (float(*)[d_model])malloc(embedding_dim * d_model * sizeof(float));
+    init_matrix(embedding_dim, d_model, pretrained_values_matrix);    
 
     if (verbose) {
         printf("Input matrix:\n");
         print_matrix(seq_len, embedding_dim, input_matrix);
 
         printf("Queries matrix:\n");
-        print_matrix(embedding_dim, d_model, queries_matrix);
+        print_matrix(embedding_dim, d_model, pretrained_queries_matrix);
 
         printf("Keys matrix:\n");
-        print_matrix(embedding_dim, d_model, keys_matrix);
+        print_matrix(embedding_dim, d_model, pretrained_keys_matrix);
 
         printf("Values matrix:\n");
-        print_matrix(embedding_dim, d_model, values_matrix);
-    }
-
-    clock_t start_time = clock();
-
-    float (*matmul_result)[d_model];
-    matmul_result = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-
-    matmul(seq_len, embedding_dim, d_model, input_matrix, queries_matrix, matmul_result);
-
-    if (verbose) {
-        printf("Matmul result:\n");
-        print_matrix(seq_len, d_model, matmul_result);
+        print_matrix(embedding_dim, d_model, pretrained_values_matrix);
     }
 
     // attention:
@@ -105,6 +93,40 @@ int main(int argc, char *argv[]) {
     // step 3: divide by sqrt(model_dim)
     // step 4: apply softmax
     // step 5: multiply with values
+    clock_t start_time = clock();
+    
+    // project input matrix with keys, values, and queries
+    // seq_len * d_model
+    float (*queries_matrix)[d_model];
+    queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+
+    // seq_len * d_model
+    float (*keys_matrix)[d_model];
+    keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+
+    // seq_len * d_model
+    float (*values_matrix)[d_model];
+    values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+
+    // transpose keys matrix: d_model * seq_len
+    float (*transposed_keys_matrix)[seq_len];
+    transposed_keys_matrix = (float(*)[seq_len])malloc(d_model * seq_len * sizeof(float));
+    transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
+
+    // calculate how much each word pays attention to each other word: seq_len * seq_len
+    float (*attention_matrix)[seq_len];
+    attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
+    matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
+    scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
+    softmax(seq_len, seq_len, attention_matrix);
+
+    // seq_len * d_model
+    float (*output_matrix)[d_model];
+    output_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
 
     clock_t end_time = clock();
 

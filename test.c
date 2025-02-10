@@ -77,31 +77,62 @@ void test_softmax() {
     int n = 2;
     int m = 2;
     float matrix[2][2] = {{1, 2}, {3, 4}};
-    float result[2][2] = {{0, 0}, {0, 0}};
 
     printf("\n=== Testing softmax ===\n");
     printf("Original Matrix:\n");
     print_matrix(n, m, matrix);
 
     printf("\nExecute softmax...\n");
-    softmax(n, m, matrix, result);
+    softmax(n, m, matrix);
 
     printf("\nSoftmax Result:\n");
-    print_matrix(n, m, result);
+    print_matrix(n, m, matrix);
 
     // Expected results (rounded to 2 decimal places):
     // [0.27 0.73]
     // [0.27 0.73]
     printf("\nChecking result...\n");
-    if (fabs(result[0][0] - 0.27) < 0.01 && fabs(result[0][1] - 0.73) < 0.01 &&
-        fabs(result[1][0] - 0.27) < 0.01 && fabs(result[1][1] - 0.73) < 0.01) {
+    if (fabs(matrix[0][0] - 0.27) < 0.01 && fabs(matrix[0][1] - 0.73) < 0.01 &&
+        fabs(matrix[1][0] - 0.27) < 0.01 && fabs(matrix[1][1] - 0.73) < 0.01) {
         printf("PASS\n");
     } else {
         printf("FAIL\n");
         printf("Expected:\n0.27 0.73\n0.27 0.73\n");
         printf("Got:\n%.2f %.2f\n%.2f %.2f\n",
-               result[0][0], result[0][1],
-               result[1][0], result[1][1]);
+               matrix[0][0], matrix[0][1],
+               matrix[1][0], matrix[1][1]);
+    }
+}
+
+void test_scale() {
+    int n = 2;
+    int m = 2;
+    float matrix[2][2] = {{1, 2}, {3, 4}};
+    float scalar = 2;
+
+    printf("\n=== Testing scale ===\n");
+    printf("Original Matrix:\n");
+    print_matrix(n, m, matrix);
+
+    printf("\nExecute scale...\n");
+    scale(n, m, matrix, scalar);
+
+    printf("\nScaled Matrix:\n");
+    print_matrix(n, m, matrix);
+
+    // Expected result should be:
+    // [2 4]
+    // [6 8]
+    printf("\nChecking result...\n");
+    if (matrix[0][0] == 2 && matrix[0][1] == 4 &&
+        matrix[1][0] == 6 && matrix[1][1] == 8) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+        printf("Expected:\n2 4\n6 8\n");
+        printf("Got:\n%.0f %.0f\n%.0f %.0f\n",
+               matrix[0][0], matrix[0][1],
+               matrix[1][0], matrix[1][1]);
     }
 }
 
@@ -109,5 +140,6 @@ int main() {
     test_matmul();
     test_transpose();
     test_softmax();
+    test_scale();
     return 0;
 }
