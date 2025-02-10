@@ -105,8 +105,6 @@ int main(int argc, char *argv[]) {
     // step 3: divide by sqrt(model_dim)
     // step 4: apply softmax
     // step 5: multiply with values
-    
-    // TODO: implement softmax
 
     clock_t end_time = clock();
 

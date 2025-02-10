@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <math.h>
 #include "lib.h"
 
 void test_matmul() {
@@ -73,8 +73,41 @@ void test_transpose() {
     }
 }
 
+void test_softmax() {
+    int n = 2;
+    int m = 2;
+    float matrix[2][2] = {{1, 2}, {3, 4}};
+    float result[2][2] = {{0, 0}, {0, 0}};
+
+    printf("\n=== Testing softmax ===\n");
+    printf("Original Matrix:\n");
+    print_matrix(n, m, matrix);
+
+    printf("\nExecute softmax...\n");
+    softmax(n, m, matrix, result);
+
+    printf("\nSoftmax Result:\n");
+    print_matrix(n, m, result);
+
+    // Expected results (rounded to 2 decimal places):
+    // [0.27 0.73]
+    // [0.27 0.73]
+    printf("\nChecking result...\n");
+    if (fabs(result[0][0] - 0.27) < 0.01 && fabs(result[0][1] - 0.73) < 0.01 &&
+        fabs(result[1][0] - 0.27) < 0.01 && fabs(result[1][1] - 0.73) < 0.01) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+        printf("Expected:\n0.27 0.73\n0.27 0.73\n");
+        printf("Got:\n%.2f %.2f\n%.2f %.2f\n",
+               result[0][0], result[0][1],
+               result[1][0], result[1][1]);
+    }
+}
+
 int main() {
     test_matmul();
     test_transpose();
+    test_softmax();
     return 0;
 }

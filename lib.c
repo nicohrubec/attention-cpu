@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 
 void print_matrix(int n, int m, float (*matrix)[m]) {
     for (int i = 0; i < n; i++) {
@@ -38,6 +39,18 @@ void transpose(int n, int m, float (*matrix)[m], float (*result)[n]) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             result[j][i] = matrix[i][j];
+        }
+    }
+}
+
+void softmax(int n, int m, float (*matrix)[m], float (*result)[m]) {
+    for (int i = 0; i < n; i++) {
+        float exp_sum = 0;
+        for (int j = 0; j < m; j++) {
+            exp_sum += exp(matrix[i][j]);
+        }
+        for (int j = 0; j < m; j++) {
+            result[i][j] = exp(matrix[i][j]) / exp_sum;
         }
     }
 }
