@@ -8,13 +8,13 @@ HEADERS = lib.h
 all: attention test
 
 attention: attention.o lib.o
-	$(CC) $(CFLAGS) -o attention attention.o lib.o
+	$(CC) $(CFLAGS) -o attention attention.o lib.o -lm
 
 attention.o: attention.c $(HEADERS)
 	$(CC) $(CFLAGS) -c attention.c -o attention.o
 
 test: test.o lib.o
-	$(CC) $(CFLAGS) -o test test.o lib.o
+	$(CC) $(CFLAGS) -o test test.o lib.o -lm
 
 test.o: test.c $(HEADERS)
 	$(CC) $(CFLAGS) -c test.c -o test.o
