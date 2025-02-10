@@ -6,6 +6,60 @@
 #include <math.h>
 #include "lib.h"
 
+// attention:
+// step 1: multiply input matrix with keys, values, and queries
+// step 2: multiply queries with transposed keys
+// step 3: divide by sqrt(model_dim)
+// step 4: apply softmax
+// step 5: multiply with values
+void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix)[embedding_dim], 
+                float (*pretrained_queries_matrix)[d_model], float (*pretrained_keys_matrix)[d_model],
+                float (*pretrained_values_matrix)[d_model], float (*output_matrix)[d_model]) {
+    clock_t start_time = clock();
+    
+    // project input matrix with keys, values, and queries
+    // seq_len * d_model
+    float (*queries_matrix)[d_model];
+    queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+
+    // seq_len * d_model
+    float (*keys_matrix)[d_model];
+    keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+
+    // seq_len * d_model
+    float (*values_matrix)[d_model];
+    values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
+    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+
+    // transpose keys matrix: d_model * seq_len
+    float (*transposed_keys_matrix)[seq_len];
+    transposed_keys_matrix = (float(*)[seq_len])malloc(d_model * seq_len * sizeof(float));
+    transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
+
+    // calculate how much each word pays attention to each other word: seq_len * seq_len
+    float (*attention_matrix)[seq_len];
+    attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
+    matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
+    scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
+    softmax(seq_len, seq_len, attention_matrix);
+
+    // multiply with values: seq_len * d_model
+    matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
+
+    clock_t end_time = clock();
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f seconds\n", time_taken);
+
+    // clean up temporary matrices
+    free(queries_matrix);
+    free(keys_matrix);
+    free(values_matrix);
+    free(transposed_keys_matrix);
+    free(attention_matrix);
+}
+
 int main(int argc, char *argv[]) {
     int seed = 42;
     int seq_len = 2048;
@@ -87,51 +141,10 @@ int main(int argc, char *argv[]) {
         print_matrix(embedding_dim, d_model, pretrained_values_matrix);
     }
 
-    // attention:
-    // step 1: multiply input matrix with keys, values, and queries
-    // step 2: multiply queries with transposed keys
-    // step 3: divide by sqrt(model_dim)
-    // step 4: apply softmax
-    // step 5: multiply with values
-    clock_t start_time = clock();
-    
-    // project input matrix with keys, values, and queries
-    // seq_len * d_model
-    float (*queries_matrix)[d_model];
-    queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
-
-    // seq_len * d_model
-    float (*keys_matrix)[d_model];
-    keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
-
-    // seq_len * d_model
-    float (*values_matrix)[d_model];
-    values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
-
-    // transpose keys matrix: d_model * seq_len
-    float (*transposed_keys_matrix)[seq_len];
-    transposed_keys_matrix = (float(*)[seq_len])malloc(d_model * seq_len * sizeof(float));
-    transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
-
-    // calculate how much each word pays attention to each other word: seq_len * seq_len
-    float (*attention_matrix)[seq_len];
-    attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
-    matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
-    scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
-    softmax(seq_len, seq_len, attention_matrix);
-
-    // seq_len * d_model
-    float (*output_matrix)[d_model];
+    // output matrix: seq_len * d_model
+    float(*output_matrix)[d_model];
     output_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
-
-    clock_t end_time = clock();
-
-    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-    printf("Time taken: %f seconds\n", time_taken);
+    attention(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, pretrained_keys_matrix, pretrained_values_matrix, output_matrix);
 
     // clean up
     free(input_matrix);
