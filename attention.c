@@ -89,14 +89,14 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
     // transpose keys matrix: d_model * seq_len
     float (*transposed_keys_matrix)[seq_len];
     transposed_keys_matrix = (float(*)[seq_len])malloc(d_model * seq_len * sizeof(float));
-    transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
+    fast_transpose(d_model, seq_len, keys_matrix, transposed_keys_matrix);
 
     // calculate how much each word pays attention to each other word: seq_len * seq_len
     float (*attention_matrix)[seq_len];
     attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
     fast_matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
-    scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
-    softmax(seq_len, seq_len, attention_matrix);
+    fast_scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
+    fast_softmax(seq_len, seq_len, attention_matrix);
 
     // multiply with values: seq_len * d_model
     fast_matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
