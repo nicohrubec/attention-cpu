@@ -5,36 +5,36 @@
 void test_matmul() {
     int n = 2;
     int m = 2;
-    int x = 2;
+    int x = 3;
     float matrix_a[2][2] = {{1, 2}, {3, 4}};
-    float matrix_b[2][2] = {{5, 6}, {7, 8}};
-    float result[2][2] = {{0, 0}, {0, 0}};
+    float matrix_b[2][3] = {{5, 6, 7}, {8, 9, 10}};
+    float result[2][3] = {{0, 0, 0}, {0, 0, 0}};
 
     printf("Matrix A:\n");
     print_matrix(n, m, matrix_a);
 
     printf("\nMatrix B:\n");
-    print_matrix(n, m, matrix_b);
+    print_matrix(m, x, matrix_b);
 
     printf("\nExecute matmul...\n");
     matmul(n, m, x, matrix_a, matrix_b, result);
 
     printf("\nResult Matrix:\n");
-    print_matrix(n, m, result);
+    print_matrix(n, x, result);
 
     // Expected result should be:
-    // [19 22]
-    // [43 50]
+    // [21 24 27]
+    // [47 54 61]
     printf("\nChecking result...\n");
-    if (result[0][0] == 19 && result[0][1] == 22 && 
-        result[1][0] == 43 && result[1][1] == 50) {
+    if (result[0][0] == 21 && result[0][1] == 24 && result[0][2] == 27 &&
+        result[1][0] == 47 && result[1][1] == 54 && result[1][2] == 61) {
         printf("PASS\n");
     } else {
         printf("FAIL\n");
-        printf("Expected:\n19 22\n43 50\n");
-        printf("Got:\n%.0f %.0f\n%.0f %.0f\n", 
-               result[0][0], result[0][1],
-               result[1][0], result[1][1]);
+        printf("Expected:\n21 24 27\n47 54 61\n");
+        printf("Got:\n%.0f %.0f %.0f\n%.0f %.0f %.0f\n",
+               result[0][0], result[0][1], result[0][2],
+               result[1][0], result[1][1], result[1][2]);
     }
 }
 
