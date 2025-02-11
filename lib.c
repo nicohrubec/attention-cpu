@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <omp.h>
 
 void print_matrix(int n, int m, float (*matrix)[m]) {
     for (int i = 0; i < n; i++) {
@@ -41,6 +42,7 @@ void matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], flo
     result: n * x
 */
 void fast_matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], float (*result)[x]) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++) {
         for (int k = 0; k < m; k++) {
             for (int j = 0; j < x; j++) {
