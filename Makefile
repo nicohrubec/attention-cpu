@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O3 -fopenmp
+CFLAGS = -Wall -Wextra -std=c99 -O3 -fopenmp -march=native
 
 SRCS = attention.c test.c lib.c
 OBJS = $(SRCS:.c=.o)
