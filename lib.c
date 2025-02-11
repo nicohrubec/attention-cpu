@@ -42,7 +42,7 @@ void matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], flo
     result: n * x
 */
 void fast_matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], float (*result)[x]) {
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < n; i++) {
         for (int k = 0; k < m; k++) {
             for (int j = 0; j < x; j++) {

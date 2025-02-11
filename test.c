@@ -10,6 +10,8 @@ void test_matmul() {
     float matrix_b[2][3] = {{5, 6, 7}, {8, 9, 10}};
     float result[2][3] = {{0, 0, 0}, {0, 0, 0}};
 
+    printf("\n=== Testing matmul ===\n");
+
     printf("Matrix A:\n");
     print_matrix(n, m, matrix_a);
 
@@ -35,6 +37,36 @@ void test_matmul() {
         printf("Got:\n%.0f %.0f %.0f\n%.0f %.0f %.0f\n",
                result[0][0], result[0][1], result[0][2],
                result[1][0], result[1][1], result[1][2]);
+    }
+
+    // Test fast_matmul with same inputs
+    float fast_result[2][3] = {{0, 0, 0}, {0, 0, 0}};
+    
+    printf("\n=== Testing fast_matmul ===\n");
+    printf("\nExecute fast_matmul...\n");
+    fast_matmul(n, m, x, matrix_a, matrix_b, fast_result);
+
+    printf("\nFast Result Matrix:\n");
+    print_matrix(n, x, fast_result);
+
+    printf("\nChecking fast result...\n");
+    if (fast_result[0][0] == 21 && fast_result[0][1] == 24 && fast_result[0][2] == 27 &&
+        fast_result[1][0] == 47 && fast_result[1][1] == 54 && fast_result[1][2] == 61) {
+        printf("PASS\n");
+    } else {
+        printf("FAIL\n");
+        printf("Expected:\n21 24 27\n47 54 61\n");
+        printf("Got:\n%.0f %.0f %.0f\n%.0f %.0f %.0f\n",
+               fast_result[0][0], fast_result[0][1], fast_result[0][2],
+               fast_result[1][0], fast_result[1][1], fast_result[1][2]);
+    }
+
+    // Compare results between normal and fast implementation
+    printf("\nComparing normal and fast results...\n");
+    if (is_equal(n, x, result, fast_result)) {
+        printf("PASS - Results match\n");
+    } else {
+        printf("FAIL - Results differ\n");
     }
 }
 
