@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <math.h>
+#include <sys/time.h>
 #include "lib.h"
 
 // attention:
@@ -15,7 +16,8 @@
 void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix)[embedding_dim], 
                 float (*pretrained_queries_matrix)[d_model], float (*pretrained_keys_matrix)[d_model],
                 float (*pretrained_values_matrix)[d_model], float (*output_matrix)[d_model]) {
-    clock_t start_time = clock();
+    struct timeval start_time, end_time;
+    gettimeofday(&start_time, NULL);
     
     // project input matrix with keys, values, and queries
     // seq_len * d_model
@@ -48,8 +50,9 @@ void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix
     // multiply with values: seq_len * d_model
     matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
 
-    clock_t end_time = clock();
-    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    gettimeofday(&end_time, NULL);
+    double time_taken = (end_time.tv_sec - start_time.tv_sec) + 
+                       (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     printf("Time taken: %f seconds\n", time_taken);
 
     // clean up temporary matrices
@@ -64,7 +67,8 @@ void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix
 void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix)[embedding_dim], 
                     float (*pretrained_queries_matrix)[d_model], float (*pretrained_keys_matrix)[d_model],
                     float (*pretrained_values_matrix)[d_model], float (*output_matrix)[d_model]) {
-    clock_t start_time = clock();
+    struct timeval start_time, end_time;
+    gettimeofday(&start_time, NULL);
     
     // project input matrix with keys, values, and queries
     // seq_len * d_model
@@ -97,8 +101,9 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
     // multiply with values: seq_len * d_model
     fast_matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
 
-    clock_t end_time = clock();
-    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    gettimeofday(&end_time, NULL);
+    double time_taken = (end_time.tv_sec - start_time.tv_sec) + 
+                       (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     printf("Time taken: %f seconds\n", time_taken);
 
     // clean up temporary matrices
