@@ -27,6 +27,21 @@ void init_matrix(int n, int m, float (*matrix)[m]) {
 */
 void matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], float (*result)[x]) {
     for (int i = 0; i < n; i++) {
+        for (int j = 0; j < x; j++) {
+            for (int k = 0; k < m; k++) {
+                result[i][j] += matrix_a[i][k] * matrix_b[k][j];
+            }
+        }
+    }   
+}
+
+/*
+    matrix_a: n * m
+    matrix_b: m * x
+    result: n * x
+*/
+void fast_matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x], float (*result)[x]) {
+    for (int i = 0; i < n; i++) {
         for (int k = 0; k < m; k++) {
             for (int j = 0; j < x; j++) {
                 result[i][j] += matrix_a[i][k] * matrix_b[k][j];

@@ -70,17 +70,17 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
     // seq_len * d_model
     float (*queries_matrix)[d_model];
     queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
 
     // seq_len * d_model
     float (*keys_matrix)[d_model];
     keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
 
     // seq_len * d_model
     float (*values_matrix)[d_model];
     values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
 
     // transpose keys matrix: d_model * seq_len
     float (*transposed_keys_matrix)[seq_len];
@@ -90,12 +90,12 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
     // calculate how much each word pays attention to each other word: seq_len * seq_len
     float (*attention_matrix)[seq_len];
     attention_matrix = (float(*)[seq_len])malloc(seq_len * seq_len * sizeof(float));
-    matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
+    fast_matmul(seq_len, d_model, seq_len, queries_matrix, transposed_keys_matrix, attention_matrix);
     scale(seq_len, seq_len, attention_matrix, 1 / sqrt(d_model));
     softmax(seq_len, seq_len, attention_matrix);
 
     // multiply with values: seq_len * d_model
-    matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
+    fast_matmul(seq_len, seq_len, d_model, attention_matrix, values_matrix, output_matrix);
 
     clock_t end_time = clock();
     double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -193,9 +193,15 @@ int main(int argc, char *argv[]) {
         } else {
             printf("VERIFICATION FAILED\n");
         }
+        
+        free(output_matrix_slow_attention);
     }
 
     // clean up
     free(input_matrix);
+    free(pretrained_queries_matrix);
+    free(pretrained_keys_matrix);
+    free(pretrained_values_matrix);
+    free(output_matrix_fast_attention);
     return 0;
 }
