@@ -112,8 +112,8 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
 int main(int argc, char *argv[]) {
     int seed = 42;
     int seq_len = 2048;
-    int d_model = 64;
-    int embedding_dim = 768;
+    int d_model = 512;
+    int embedding_dim = 512;
     int verify = 0;
     int opt;
 
