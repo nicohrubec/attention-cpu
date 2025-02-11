@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+
 #include "lib.h"
 
 void test_matmul() {
@@ -37,6 +39,7 @@ void test_matmul() {
         printf("Got:\n%.0f %.0f %.0f\n%.0f %.0f %.0f\n",
                result[0][0], result[0][1], result[0][2],
                result[1][0], result[1][1], result[1][2]);
+        exit(1);
     }
 
     // Test fast_matmul with same inputs
@@ -59,6 +62,7 @@ void test_matmul() {
         printf("Got:\n%.0f %.0f %.0f\n%.0f %.0f %.0f\n",
                fast_result[0][0], fast_result[0][1], fast_result[0][2],
                fast_result[1][0], fast_result[1][1], fast_result[1][2]);
+        exit(1);
     }
 
     // Compare results between normal and fast implementation
@@ -67,6 +71,7 @@ void test_matmul() {
         printf("PASS - Results match\n");
     } else {
         printf("FAIL - Results differ\n");
+        exit(1);
     }
 }
 
@@ -102,6 +107,7 @@ void test_transpose() {
                result[0][0], result[0][1],
                result[1][0], result[1][1],
                result[2][0], result[2][1]);
+        exit(1);
     }
 }
 
@@ -133,6 +139,7 @@ void test_softmax() {
         printf("Got:\n%.2f %.2f\n%.2f %.2f\n",
                matrix[0][0], matrix[0][1],
                matrix[1][0], matrix[1][1]);
+        exit(1);
     }
 }
 
@@ -165,6 +172,7 @@ void test_scale() {
         printf("Got:\n%.0f %.0f\n%.0f %.0f\n",
                matrix[0][0], matrix[0][1],
                matrix[1][0], matrix[1][1]);
+        exit(1);
     }
 }
 
@@ -189,6 +197,7 @@ void test_is_equal() {
         printf("PASS: matrix_a and matrix_b are equal\n");
     } else {
         printf("FAIL: matrix_a and matrix_b are not equal\n");
+        exit(1);
     }
 
     printf("\nChecking matrix_a and matrix_c...\n");
@@ -197,6 +206,7 @@ void test_is_equal() {
         printf("PASS: matrix_a and matrix_c are not equal\n");
     } else {
         printf("FAIL: matrix_a and matrix_c are equal\n");
+        exit(1);
     }
 }
 
