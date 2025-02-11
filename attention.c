@@ -23,17 +23,17 @@ void attention(int seq_len, int embedding_dim, int d_model, float (*input_matrix
     // seq_len * d_model
     float (*queries_matrix)[d_model];
     queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, queries_matrix);
 
     // seq_len * d_model
     float (*keys_matrix)[d_model];
     keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, keys_matrix);
 
     // seq_len * d_model
     float (*values_matrix)[d_model];
     values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+    matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_values_matrix, values_matrix);
 
     // transpose keys matrix: d_model * seq_len
     float (*transposed_keys_matrix)[seq_len];
@@ -74,17 +74,17 @@ void fast_attention(int seq_len, int embedding_dim, int d_model, float (*input_m
     // seq_len * d_model
     float (*queries_matrix)[d_model];
     queries_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    fast_matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, queries_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_queries_matrix, queries_matrix);
 
     // seq_len * d_model
     float (*keys_matrix)[d_model];
     keys_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    fast_matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_keys_matrix, keys_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_keys_matrix, keys_matrix);
 
     // seq_len * d_model
     float (*values_matrix)[d_model];
     values_matrix = (float(*)[d_model])malloc(seq_len * d_model * sizeof(float));
-    fast_matmul(seq_len, embedding_dim, d_model, pretrained_queries_matrix, pretrained_values_matrix, values_matrix);
+    fast_matmul(seq_len, embedding_dim, d_model, input_matrix, pretrained_values_matrix, values_matrix);
 
     // transpose keys matrix: d_model * seq_len
     float (*transposed_keys_matrix)[seq_len];
