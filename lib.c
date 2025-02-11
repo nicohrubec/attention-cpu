@@ -53,6 +53,7 @@ void fast_matmul(int n, int m, int x, float (*matrix_a)[m], float (*matrix_b)[x]
 }
 
 void transpose(int n, int m, float (*matrix)[m], float (*result)[n]) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             result[j][i] = matrix[i][j];
@@ -61,6 +62,7 @@ void transpose(int n, int m, float (*matrix)[m], float (*result)[n]) {
 }
 
 void softmax(int n, int m, float (*matrix)[m]) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++) {
         float exp_sum = 0;
         for (int j = 0; j < m; j++) {
@@ -73,6 +75,7 @@ void softmax(int n, int m, float (*matrix)[m]) {
 }
 
 void scale(int n, int m, float (*matrix)[m], float scalar) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             matrix[i][j] *= scalar;
